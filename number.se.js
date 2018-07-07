@@ -1,5 +1,5 @@
 /**
- * number.se - v1.0.1
+ * number.se - v1.0.3
  * Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer
  * @author Rob Parham
  * @website http://pamblam.github.io/number.se/
@@ -12,7 +12,7 @@ Number.SE = function(number){
 	this.number = Number.SE.normalize(number);
 };
 
-Number.SE.version = '1.0.1';
+Number.SE.version = '1.0.3';
 
 Number.SE.normalize = function(number){
 	if(typeof number !== "string" && typeof number !== "number" && !(number instanceof Number.SE)){
@@ -94,7 +94,7 @@ Number.SE.prototype.add = function(number){
 			return this;
 		}
 		var isNeg = (largerNumber.number === n1.number && is1neg) || (largerNumber.number === n2.number && is2neg);
-		this.number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber);
+		this.number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
 		return this;
 	}
 	var isNeg = n1.isNegative() && n2.isNegative();
@@ -149,6 +149,7 @@ Number.SE.prototype.subtract = function(number){
 	n2 = n2.number.split('').reverse();
 	var buffer = [];
 	const borrow = (arr, idx) => {
+		if("."===arr[idx+1]) return borrow(arr, idx+1);
 		if(parseInt(arr[idx+1])>0) arr[idx+1] = (parseInt(arr[idx+1])-1).toString();
 		else{
 			arr[idx+1] = (parseInt("1"+arr[idx+1])-1).toString()

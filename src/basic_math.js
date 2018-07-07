@@ -13,7 +13,7 @@ Number.SE.prototype.add = function(number){
 			return this;
 		}
 		var isNeg = (largerNumber.number === n1.number && is1neg) || (largerNumber.number === n2.number && is2neg);
-		this.number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber);
+		this.number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
 		return this;
 	}
 	var isNeg = n1.isNegative() && n2.isNegative();
@@ -68,6 +68,7 @@ Number.SE.prototype.subtract = function(number){
 	n2 = n2.number.split('').reverse();
 	var buffer = [];
 	const borrow = (arr, idx) => {
+		if("."===arr[idx+1]) return borrow(arr, idx+1);
 		if(parseInt(arr[idx+1])>0) arr[idx+1] = (parseInt(arr[idx+1])-1).toString();
 		else{
 			arr[idx+1] = (parseInt("1"+arr[idx+1])-1).toString()
