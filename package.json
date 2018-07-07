@@ -1,12 +1,37 @@
 {
   "name": "number.se",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.0.1",
+  "description": "Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer",
+  "main": "number.se.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node_modules/grunt/bin/grunt",
+    "test": "node node_modules/.bin/mocha",
+    "coverage": "node node_modules/.bin/istanbul cover _mocha -- -R spec",
+    "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "string-encoded",
+    "number",
+    "math"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://Pamblam@github.com/Pamblam/number.se.git"
+  },
+  "author": "Rob Parham",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Pamblam/number.se/issues"
+  },
+  "homepage": "http://pamblam.github.io/number.se/",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.2",
+    "grunt": "^1.0.3",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-uglify-es": "^3.3.0",
+    "grunt-string-replace": "^1.3.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^5.2.0"
+  }
 }

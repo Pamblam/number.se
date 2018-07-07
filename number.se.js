@@ -1,8 +1,18 @@
+/**
+ * number.se - v1.0.1
+ * Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer
+ * @author Rob Parham
+ * @website http://pamblam.github.io/number.se/
+ * @license Apache-2.0
+ */
+
 
 Number.SE = function(number){
 	if(!(this instanceof Number.SE)) return new Number.SE(number);
 	this.number = Number.SE.normalize(number);
 };
+
+Number.SE.version = '1.0.1';
 
 Number.SE.normalize = function(number){
 	if(typeof number !== "string" && typeof number !== "number" && !(number instanceof Number.SE)){
@@ -61,6 +71,7 @@ Number.SE.alignDecimals = function(number1, number2){
 	return [number1, number2];
 };
 
+
 Number.SE.prototype.isNegative = function(){
 	return this.number.substr(0,1) === "-";
 };
@@ -109,17 +120,35 @@ Number.SE.prototype.add = function(number){
 
 Number.SE.prototype.subtract = function(number){
 	var [n1, n2] = Number.SE.alignDecimals(this.number, number);
-	var isNegative = n1.number < n2.number;
-	if(isNegative){
-		var temp = n1;
-		n1 = n2;
-		n2 = temp;
+	if(n1.isNegative() && !n2.isNegative()){
+		n1.number = n1.abs();
+		this.number = "-"+n1.add(n2).number;
+		return this;
+	}else if(!n1.isNegative() && n2.isNegative()){
+		n2.number = n2.abs();
+		this.number = n1.add(n2).number;
+		return this;
+	}else if(n2.isNegative() && n1.isNegative()){
+		n1.number = n1.abs();
+		n2.number = n2.abs();
+		var isNegative = n1.number > n2.number;
+		if(!isNegative){
+			var temp = n1;
+			n1 = n2;
+			n2 = temp;
+		}
+	}else{
+		var isNegative = n1.number < n2.number;
+		if(isNegative){
+			var temp = n1;
+			n1 = n2;
+			n2 = temp;
+		}
 	}
 	n1 = n1.number.split('').reverse();
 	n2 = n2.number.split('').reverse();
 	var buffer = [];
 	const borrow = (arr, idx) => {
-		if(arr[idx+1] === undefined) process.exit();
 		if(parseInt(arr[idx+1])>0) arr[idx+1] = (parseInt(arr[idx+1])-1).toString();
 		else{
 			arr[idx+1] = (parseInt("1"+arr[idx+1])-1).toString()
@@ -136,10 +165,9 @@ Number.SE.prototype.subtract = function(number){
 		}
 		buffer.push(x - y);
 	}
-	return Number.SE.normalize((isNegative?"-":"")+(buffer.reverse().join('')));
+	this.number = Number.SE.normalize((isNegative?"-":"")+(buffer.reverse().join('')));
+	return this;
 };
 
 
-var a = Number.SE("-30000.3");
-var b = Number.SE("-123444.8");
-console.log(a.add(b).number);
+
