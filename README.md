@@ -1,7 +1,7 @@
 
 ## Number.SE
 
-*v1.0.3*
+*v1.0.21*
 
 Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer.
 

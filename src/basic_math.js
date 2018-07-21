@@ -89,5 +89,106 @@ Number.SE.prototype.subtract = function(number){
 	return this;
 };
 
+Number.SE.prototype.multiplyBy = function(number){
+	var [n1, n2] = Number.SE.alignDecimals(this.number, number);
+	var decimalPlaces = n1.number.split('').reverse().indexOf(".");
+	if(decimalPlaces < 1) decimalPlaces = 0;
+	var a = n1.number.replace(/\./g,'');
+	var b = n2.number.replace(/\./g,'');
+	var isNegative = false;
+	if(a.substr(0,1)==="-"){
+		isNegative = !isNegative;
+		a = a.substr(1);
+	}
+	if(b.substr(0,1)==="-"){
+		isNegative = !isNegative;
+		b = b.substr(1);
+	}
+	
+	a = (""+a).split('').reverse();
+	b = (""+b).split('').reverse();
+	var result = [];
 
+	for (var i = 0; a[i] >= 0; i++) {
+		for (var j = 0; b[j] >= 0; j++) {
+			if (!result[i + j]) {
+				result[i + j] = 0;
+			}
+			result[i + j] += a[i] * b[j];
+		}
+	}
 
+	for (var i = 0; result[i] >= 0; i++) {
+		if (result[i] >= 10) {
+			if (!result[i + 1]) {
+				result[i + 1] = 0;
+			}
+			result[i + 1] += parseInt(result[i] / 10);
+			result[i] %= 10;
+		}
+	}
+	
+	if(decimalPlaces) result.splice(decimalPlaces*2, 0, ".");
+	if(isNegative) result.push("-");
+	
+	this.number = Number.SE.normalize(result.reverse().join(''));
+	return this;
+};
+
+Number.SE.prototype.divideBy = function(divisor) {
+	var dividend = this.number;
+	if(!(divisor instanceof Number.SE)) divisor = new Number.SE(divisor).number;
+	
+	var isNegative = false;
+	if(dividend.substr(0,1)=="-"){
+		isNegative = !isNegative;
+		dividend = dividend.substr(1);
+	}
+	if(divisor.substr(0,1)=="-"){
+		isNegative = !isNegative;
+		divisor = divisor.substr(1);
+	}
+	
+	var dvr_dec_places = 0;
+	if (divisor.indexOf(".") > -1) {
+		var dvr_dec_ar = divisor.split(".");
+		dvr_dec_places = dvr_dec_ar[1].length;
+		divisor = dvr_dec_ar[0] + "" + dvr_dec_ar[1];
+	}
+	var dvd_int_places = dividend.length;
+	if (dividend.indexOf(".") > -1) {
+		var dvd_dec_ar = dividend.split(".");
+		dvd_int_places = dvd_dec_ar[0].length;
+		dividend = dvd_dec_ar[0] + "" + dvd_dec_ar[1];
+	} 
+	var dvd_ar = dividend.split("");
+	dvd_int_places += dvr_dec_places;
+	if (dvd_int_places > dvd_ar.length) {
+		while (dvd_ar.length < dvd_int_places) dvd_ar.push("0");
+	}
+	var digit = "";
+	var answer = "";
+	var remainder = 0;
+	var i = 0;
+	var ans_plc = 1;
+	var solved = false;
+	while (answer.length-dvd_int_places < Number.SE.precision && !solved) {	
+		var all_digits_used = false;
+		if (i < dvd_ar.length) {
+			digit = dvd_ar[i].toString();
+		} else {
+			digit = "0";
+			dvd_ar.push("0");
+			all_digits_used = true;
+		}
+		answer = answer + Math.floor((Number(digit) + (remainder * 10)) / divisor);
+		remainder = (Number(digit) + (remainder * 10)) % divisor;
+		var solved = all_digits_used && remainder == 0;
+		ans_plc++;
+		i++;
+	}
+	this.number = answer.substr(0, dvd_int_places) + "." + answer.substr(dvd_int_places, answer.length);
+	this.number = Number.SE.normalize(this.number);
+	if(isNegative) this.number = "-"+this.number;
+	return this;
+};

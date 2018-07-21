@@ -25,9 +25,10 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				src: [
-					'src/number.se.js', 
+					'src/constructor.js', 
 					'src/helpers.js',
-					'src/basic_math.js'
+					'src/basic_math.js',
+					'src/advanced_math.js'
 				],
 				dest: 'number.se.js',
 			},

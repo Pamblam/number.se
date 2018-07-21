@@ -1,5 +1,5 @@
 /**
- * number.se - v1.0.3
+ * number.se - v1.0.21
  * Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer
  * @author Rob Parham
  * @website http://pamblam.github.io/number.se/
@@ -12,7 +12,9 @@ Number.SE = function(number){
 	this.number = Number.SE.normalize(number);
 };
 
-Number.SE.version = '1.0.3';
+Number.SE.version = '1.0.21';
+
+Number.SE.precision = 1000;
 
 Number.SE.normalize = function(number){
 	if(typeof number !== "string" && typeof number !== "number" && !(number instanceof Number.SE)){
@@ -22,26 +24,53 @@ Number.SE.normalize = function(number){
 	const trimLeadingZeroes = n=> n.substr(0,1)==="0"?trimLeadingZeroes(n.substr(1)):n;
 	var n = typeof number === "string" ? number : number instanceof Number.SE ? number.number : number.toString();
 	n = n.trim();
+	if(!/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(n)){
+		throw new Error("SE Contrstructor requires a valid numeric string");
+	}
+	if(n.substr(0,1) === "+") n = n.substr(1);
 	var isNegative = n.substr(0,1) === "-";
 	if(isNegative) n = n.substr(1);
 	n = trimTrailingZeroes(trimLeadingZeroes(n));
+	if(""===n) isNegative=false;
 	return n ? isNegative ? "-"+n : n : "0";
 };
 
-Number.SE.max = function(number1, number2){
-	if(!(number1 instanceof Number.SE)) number1 = new Number.SE(number1);
-	if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
-	if(number1.isNegative() && !number2.isNegative()) return number2;
-	if(!number1.isNegative() && number2.isNegative()) return number1;
-	return number1.abs() > number2.abs() ? number1 : number2;
+Number.SE.max = function(){
+	var args = Array.from(arguments);
+	if(args.length === 1){
+		return args[0] instanceof Number.SE ? args[0] : Number.SE(args[0]);
+	}else if(args.length > 2){
+		var max = 0;
+		for(var i=0; i<args.length; i++) max = Number.SE.max(max, args[i]);
+		return max;
+	}else{
+		var number1 = args[0];
+		var number2 = args[1];
+		if(!(number1 instanceof Number.SE)) number1 = new Number.SE(number1);
+		if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
+		if(number1.isNegative() && !number2.isNegative()) return number2;
+		if(!number1.isNegative() && number2.isNegative()) return number1;
+		return number1.abs() > number2.abs() ? number1 : number2;
+	}
 };
 
-Number.SE.min = function(number1, number2){
-	if(!(number1 instanceof Number.SE)) number1 = new Number.SE(number1);
-	if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
-	if(number1.isNegative() && !number2.isNegative()) return number1;
-	if(!number1.isNegative() && number2.isNegative()) return number2;
-	return number1.abs() > number2.abs() ? number2 : number1;
+Number.SE.min = function(){
+	var args = Array.from(arguments);
+	if(args.length === 1){
+		return args[0] instanceof Number.SE ? args[0] : Number.SE(args[0]);
+	}else if(args.length > 2){
+		var min = 0;
+		for(var i=0; i<args.length; i++) min = Number.SE.min(min, args[i]);
+		return min;
+	}else{
+		var number1 = args[0];
+		var number2 = args[1];
+		if(!(number1 instanceof Number.SE)) number1 = new Number.SE(number1);
+		if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
+		if(number1.isNegative() && !number2.isNegative()) return number1;
+		if(!number1.isNegative() && number2.isNegative()) return number2;
+		return number1.abs() > number2.abs() ? number2 : number1;
+	}
 };
 
 Number.SE.alignDecimals = function(number1, number2){
@@ -54,7 +83,6 @@ Number.SE.alignDecimals = function(number1, number2){
 	const getDecimalPosit = n=>~n.number.indexOf(".") ? n.number.indexOf(".") : n.number.length;
 	const addLeadingZeros = (n, dif)=>"0".repeat(dif)+n.number;
 	const addTrailingZeros = (n, dif)=>n.number+"0".repeat(dif);
-	const trimTrailingZeroes = n=> ~n.indexOf(".")&&n.substr(-1)==="0"?trimTrailingZeroes(n.substr(0,n.length-1)):n;
 	const postDecimalLength = n=>~n.indexOf(".")?n.length-n.indexOf(".")-1:0;
 	var dpos1 = getDecimalPosit(number1);
 	var dpos2 = getDecimalPosit(number2);
@@ -170,5 +198,106 @@ Number.SE.prototype.subtract = function(number){
 	return this;
 };
 
+Number.SE.prototype.multiplyBy = function(number){
+	var [n1, n2] = Number.SE.alignDecimals(this.number, number);
+	var decimalPlaces = n1.number.split('').reverse().indexOf(".");
+	if(decimalPlaces < 1) decimalPlaces = 0;
+	var a = n1.number.replace(/\./g,'');
+	var b = n2.number.replace(/\./g,'');
+	var isNegative = false;
+	if(a.substr(0,1)==="-"){
+		isNegative = !isNegative;
+		a = a.substr(1);
+	}
+	if(b.substr(0,1)==="-"){
+		isNegative = !isNegative;
+		b = b.substr(1);
+	}
+	
+	a = (""+a).split('').reverse();
+	b = (""+b).split('').reverse();
+	var result = [];
 
+	for (var i = 0; a[i] >= 0; i++) {
+		for (var j = 0; b[j] >= 0; j++) {
+			if (!result[i + j]) {
+				result[i + j] = 0;
+			}
+			result[i + j] += a[i] * b[j];
+		}
+	}
 
+	for (var i = 0; result[i] >= 0; i++) {
+		if (result[i] >= 10) {
+			if (!result[i + 1]) {
+				result[i + 1] = 0;
+			}
+			result[i + 1] += parseInt(result[i] / 10);
+			result[i] %= 10;
+		}
+	}
+	
+	if(decimalPlaces) result.splice(decimalPlaces*2, 0, ".");
+	if(isNegative) result.push("-");
+	
+	this.number = Number.SE.normalize(result.reverse().join(''));
+	return this;
+};
+
+Number.SE.prototype.divideBy = function(divisor, precision=1000) {
+	var dividend = this.number;
+	if(!(divisor instanceof Number.SE)) divisor = new Number.SE(divisor).number;
+	
+	var isNegative = false;
+	if(dividend.substr(0,1)=="-"){
+		isNegative = !isNegative;
+		dividend = dividend.substr(1);
+	}
+	if(divisor.substr(0,1)=="-"){
+		isNegative = !isNegative;
+		divisor = divisor.substr(1);
+	}
+	
+	var dvr_dec_places = 0;
+	if (divisor.indexOf(".") > -1) {
+		var dvr_dec_ar = divisor.split(".");
+		dvr_dec_places = dvr_dec_ar[1].length;
+		divisor = dvr_dec_ar[0] + "" + dvr_dec_ar[1];
+	}
+	var dvd_int_places = dividend.length;
+	if (dividend.indexOf(".") > -1) {
+		var dvd_dec_ar = dividend.split(".");
+		dvd_int_places = dvd_dec_ar[0].length;
+		dividend = dvd_dec_ar[0] + "" + dvd_dec_ar[1];
+	} 
+	var dvd_ar = dividend.split("");
+	dvd_int_places += dvr_dec_places;
+	if (dvd_int_places > dvd_ar.length) {
+		while (dvd_ar.length < dvd_int_places) dvd_ar.push("0");
+	}
+	var digit = "";
+	var answer = "";
+	var remainder = 0;
+	var i = 0;
+	var ans_plc = 1;
+	var solved = false;
+	while (answer.length-dvd_int_places < precision && !solved) {	
+		var all_digits_used = false;
+		if (i < dvd_ar.length) {
+			digit = dvd_ar[i].toString();
+		} else {
+			digit = "0";
+			dvd_ar.push("0");
+			all_digits_used = true;
+		}
+		answer = answer + Math.floor((Number(digit) + (remainder * 10)) / divisor);
+		remainder = (Number(digit) + (remainder * 10)) % divisor;
+		var solved = all_digits_used && remainder == 0;
+		ans_plc++;
+		i++;
+	}
+	this.number = answer.substr(0, dvd_int_places) + "." + answer.substr(dvd_int_places, answer.length);
+	this.number = Number.SE.normalize(this.number);
+	if(isNegative) this.number = "-"+this.number;
+	return this;
+};
