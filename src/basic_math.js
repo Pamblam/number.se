@@ -8,13 +8,10 @@ Number.SE.prototype.add = function(number){
 		n2.number = n2.abs();
 		var largerNumber = n1.number > n2.number ? n1 : n1.number < n2.number ? n2 : false;
 		var smallerNumber = n1.number > n2.number ? n2 : n1.number < n2.number ? n1 : false;
-		if(largerNumber === false || smallerNumber === false){
-			this.number = "0";
-			return this;
-		}
+		if(largerNumber === false || smallerNumber === false) return Number.SE("0");
 		var isNeg = (largerNumber.number === n1.number && is1neg) || (largerNumber.number === n2.number && is2neg);
-		this.number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
-		return this;
+		var number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
+		return Number.SE(number);
 	}
 	var isNeg = n1.isNegative() && n2.isNegative();
 	if(isNeg){
@@ -33,20 +30,18 @@ Number.SE.prototype.add = function(number){
 		carry = sum.length ? parseInt(sum.join('')) : 0;
 	}
 	buffer.push(...carry.toString().split('').reverse());
-	this.number = Number.SE.normalize((isNeg ? "-" : "") + buffer.reverse().join(''));
-	return this;
+	var number = number = Number.SE.normalize((isNeg ? "-" : "") + buffer.reverse().join(''));
+	return Number.SE(number);
 };
 
 Number.SE.prototype.subtract = function(number){
 	var [n1, n2] = Number.SE.alignDecimals(this.number, number);
 	if(n1.isNegative() && !n2.isNegative()){
 		n1.number = n1.abs();
-		this.number = "-"+n1.add(n2).number;
-		return this;
+		return Number.SE("-"+n1.add(n2).number);
 	}else if(!n1.isNegative() && n2.isNegative()){
 		n2.number = n2.abs();
-		this.number = n1.add(n2).number;
-		return this;
+		return Number.SE(n1.add(n2).number);
 	}else if(n2.isNegative() && n1.isNegative()){
 		n1.number = n1.abs();
 		n2.number = n2.abs();
@@ -85,8 +80,8 @@ Number.SE.prototype.subtract = function(number){
 		}
 		buffer.push(x - y);
 	}
-	this.number = Number.SE.normalize((isNegative?"-":"")+(buffer.reverse().join('')));
-	return this;
+	var number = Number.SE.normalize((isNegative?"-":"")+(buffer.reverse().join('')));
+	return Number.SE(number);
 };
 
 Number.SE.prototype.multiplyBy = function(number){
@@ -131,8 +126,8 @@ Number.SE.prototype.multiplyBy = function(number){
 	if(decimalPlaces) result.splice(decimalPlaces*2, 0, ".");
 	if(isNegative) result.push("-");
 	
-	this.number = Number.SE.normalize(result.reverse().join(''));
-	return this;
+	var number = Number.SE.normalize(result.reverse().join(''));
+	return Number.SE(number);
 };
 
 Number.SE.prototype.divideBy = function(divisor) {
@@ -187,8 +182,8 @@ Number.SE.prototype.divideBy = function(divisor) {
 		ans_plc++;
 		i++;
 	}
-	this.number = answer.substr(0, dvd_int_places) + "." + answer.substr(dvd_int_places, answer.length);
-	this.number = Number.SE.normalize(this.number);
-	if(isNegative) this.number = "-"+this.number;
-	return this;
+	var num = answer.substr(0, dvd_int_places) + "." + answer.substr(dvd_int_places, answer.length);
+	num = Number.SE.normalize(num);
+	if(isNegative) num = "-"+num;
+	return Number.SE(num);
 };

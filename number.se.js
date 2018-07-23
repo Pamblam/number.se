@@ -1,5 +1,5 @@
 /**
- * number.se - v1.0.21
+ * number.se - v1.0.34
  * Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer
  * @author Rob Parham
  * @website http://pamblam.github.io/number.se/
@@ -12,7 +12,7 @@ Number.SE = function(number){
 	this.number = Number.SE.normalize(number);
 };
 
-Number.SE.version = '1.0.21';
+Number.SE.version = '1.0.34';
 
 Number.SE.precision = 1000;
 
@@ -74,8 +74,8 @@ Number.SE.min = function(){
 };
 
 Number.SE.alignDecimals = function(number1, number2){
-	if(!(number1 instanceof Number.SE)) number1 = new Number.SE(number1);
-	if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
+	number1 = new Number.SE(number1);
+	number2 = new Number.SE(number2);
 	var is1neg = number1.isNegative();
 	var is2neg = number2.isNegative();
 	number1.number = number1.abs(); 
@@ -99,6 +99,18 @@ Number.SE.alignDecimals = function(number1, number2){
 	return [number1, number2];
 };
 
+Number.SE.greatestCommonDivisor = function(){
+	
+};
+
+Number.SE.toFraction = function (number) {
+	if (!(number instanceof Number.SE)) number = Number.SE(number).number;
+	if (!~number.indexOf(".")) return {numerator: number, denominator: "1"};
+	var n = number.split(".");
+	var denominator = "1"+("0".repeat(n[1].length));
+	var numerator = Number.SE(n[0]?n[0]:0).multiplyBy(denominator).add(n[1]).number;
+	return {numerator: numerator, denominator: denominator};
+};
 
 Number.SE.prototype.isNegative = function(){
 	return this.number.substr(0,1) === "-";
@@ -106,6 +118,36 @@ Number.SE.prototype.isNegative = function(){
 
 Number.SE.prototype.abs = function(){
 	return this.isNegative() ? this.number.substr(1) : this.number;
+};
+
+Number.SE.prototype.greaterThan = function(y){
+	const trimLeadingZeros = n=>{ while(n.substr(0,1)=="0") n=n.substr(1); return n; }
+	const trimTrailingZeros = n=>{ while(n.substr(-1)=="0") n=n.substr(0, n.length-1); return n; }
+	var x = this.number;
+	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
+	if(!~x.indexOf(".")) x+=".";
+	if(!~y.indexOf(".")) y+=".";
+	x = trimLeadingZeros(trimTrailingZeros(x));
+	y = trimLeadingZeros(trimTrailingZeros(y));
+	if(x.indexOf(".") > y.indexOf(".")) return true;
+	if(y.indexOf(".") > x.indexOf(".")) return false;
+	for(var i=0; i<x.length; i++){
+		if(!y[i]) return true;
+		if(x[i] > y[i]) return true;
+		if(x[i] < y[i]) return false;
+	}
+	return false;
+};
+
+Number.SE.prototype.lessThan = function(y){
+	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
+	if(y===this.number||this.greaterThan(y)) return false;
+	return true;
+};
+
+Number.SE.prototype.equals = function(y){
+	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
+	return y===this.number;
 };
 
 Number.SE.prototype.add = function(number){
@@ -117,13 +159,10 @@ Number.SE.prototype.add = function(number){
 		n2.number = n2.abs();
 		var largerNumber = n1.number > n2.number ? n1 : n1.number < n2.number ? n2 : false;
 		var smallerNumber = n1.number > n2.number ? n2 : n1.number < n2.number ? n1 : false;
-		if(largerNumber === false || smallerNumber === false){
-			this.number = "0";
-			return this;
-		}
+		if(largerNumber === false || smallerNumber === false) return Number.SE("0");
 		var isNeg = (largerNumber.number === n1.number && is1neg) || (largerNumber.number === n2.number && is2neg);
-		this.number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
-		return this;
+		var number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
+		return Number.SE(number);
 	}
 	var isNeg = n1.isNegative() && n2.isNegative();
 	if(isNeg){
@@ -142,20 +181,18 @@ Number.SE.prototype.add = function(number){
 		carry = sum.length ? parseInt(sum.join('')) : 0;
 	}
 	buffer.push(...carry.toString().split('').reverse());
-	this.number = Number.SE.normalize((isNeg ? "-" : "") + buffer.reverse().join(''));
-	return this;
+	var number = number = Number.SE.normalize((isNeg ? "-" : "") + buffer.reverse().join(''));
+	return Number.SE(number);
 };
 
 Number.SE.prototype.subtract = function(number){
 	var [n1, n2] = Number.SE.alignDecimals(this.number, number);
 	if(n1.isNegative() && !n2.isNegative()){
 		n1.number = n1.abs();
-		this.number = "-"+n1.add(n2).number;
-		return this;
+		return Number.SE("-"+n1.add(n2).number);
 	}else if(!n1.isNegative() && n2.isNegative()){
 		n2.number = n2.abs();
-		this.number = n1.add(n2).number;
-		return this;
+		return Number.SE(n1.add(n2).number);
 	}else if(n2.isNegative() && n1.isNegative()){
 		n1.number = n1.abs();
 		n2.number = n2.abs();
@@ -194,8 +231,8 @@ Number.SE.prototype.subtract = function(number){
 		}
 		buffer.push(x - y);
 	}
-	this.number = Number.SE.normalize((isNegative?"-":"")+(buffer.reverse().join('')));
-	return this;
+	var number = Number.SE.normalize((isNegative?"-":"")+(buffer.reverse().join('')));
+	return Number.SE(number);
 };
 
 Number.SE.prototype.multiplyBy = function(number){
@@ -240,11 +277,11 @@ Number.SE.prototype.multiplyBy = function(number){
 	if(decimalPlaces) result.splice(decimalPlaces*2, 0, ".");
 	if(isNegative) result.push("-");
 	
-	this.number = Number.SE.normalize(result.reverse().join(''));
-	return this;
+	var number = Number.SE.normalize(result.reverse().join(''));
+	return Number.SE(number);
 };
 
-Number.SE.prototype.divideBy = function(divisor, precision=1000) {
+Number.SE.prototype.divideBy = function(divisor) {
 	var dividend = this.number;
 	if(!(divisor instanceof Number.SE)) divisor = new Number.SE(divisor).number;
 	
@@ -281,7 +318,7 @@ Number.SE.prototype.divideBy = function(divisor, precision=1000) {
 	var i = 0;
 	var ans_plc = 1;
 	var solved = false;
-	while (answer.length-dvd_int_places < precision && !solved) {	
+	while (answer.length-dvd_int_places < Number.SE.precision && !solved) {	
 		var all_digits_used = false;
 		if (i < dvd_ar.length) {
 			digit = dvd_ar[i].toString();
@@ -296,8 +333,29 @@ Number.SE.prototype.divideBy = function(divisor, precision=1000) {
 		ans_plc++;
 		i++;
 	}
-	this.number = answer.substr(0, dvd_int_places) + "." + answer.substr(dvd_int_places, answer.length);
-	this.number = Number.SE.normalize(this.number);
-	if(isNegative) this.number = "-"+this.number;
-	return this;
+	var num = answer.substr(0, dvd_int_places) + "." + answer.substr(dvd_int_places, answer.length);
+	num = Number.SE.normalize(num);
+	if(isNegative) num = "-"+num;
+	return Number.SE(num);
 };
+
+Number.SE.prototype.floor = function(){
+	if(!~this.number.indexOf(".")) return Number.SE(this.number);
+	return Number.SE(this.number.split(".")[0] || "0");
+};
+
+Number.SE.prototype.mod = function(divisor) {
+	return this.subtract(this.divideBy(divisor).floor().multiplyBy(divisor));
+};
+
+Number.SE.prototype.powerOf = function(n){
+	// https://www.wikihow.com/Solve-Decimal-Exponents
+	// https://www.quora.com/How-do-we-solve-decimal-exponents
+	// need to figure out roots first
+};
+
+Number.SE.prototype.factorial = function(){
+	// https://stackoverflow.com/questions/15454183/how-to-make-a-function-that-computes-the-factorial-for-numbers-with-decimals
+	// need sqrt, sin, pow first
+};
+

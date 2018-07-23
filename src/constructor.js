@@ -66,8 +66,8 @@ Number.SE.min = function(){
 };
 
 Number.SE.alignDecimals = function(number1, number2){
-	if(!(number1 instanceof Number.SE)) number1 = new Number.SE(number1);
-	if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
+	number1 = new Number.SE(number1);
+	number2 = new Number.SE(number2);
 	var is1neg = number1.isNegative();
 	var is2neg = number2.isNegative();
 	number1.number = number1.abs(); 
@@ -89,4 +89,27 @@ Number.SE.alignDecimals = function(number1, number2){
 	if(is1neg) number1.number = "-"+number1.number;
 	if(is2neg) number2.number = "-"+number2.number;
 	return [number1, number2];
+};
+
+Number.SE.greatestCommonDivisor = function(a, b){
+	a = Number.SE(a);
+	b = Number.SE(b);
+	var y = Number.SE(0), x = Number.SE(0), temp;
+	if (a.greaterThan(b)) { x = a; y = b; } 
+	else { x = b; y = a; }
+	while (x.mod(y).number !== "0") {
+		temp = x;
+		x = y;
+		y = temp.mod(x);
+	}
+	return y;
+};
+
+Number.SE.toFraction = function (number) {
+	number = Number.SE(number).number;
+	if (!~number.indexOf(".")) return {numerator: number, denominator: "1"};
+	var n = number.split(".");
+	var denominator = "1"+("0".repeat(n[1].length));
+	var numerator = Number.SE(n[0]?n[0]:0).multiplyBy(denominator).add(n[1]).number;
+	return {numerator: numerator, denominator: denominator};
 };

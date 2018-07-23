@@ -36,3 +36,12 @@ Number.SE.prototype.equals = function(y){
 	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
 	return y===this.number;
 };
+
+Number.SE.prototype.floor = function(){
+	if(!~this.number.indexOf(".")) return Number.SE(this.number);
+	return Number.SE(this.number.split(".")[0] || "0");
+};
+
+Number.SE.prototype.mod = function(divisor) {
+	return this.subtract(this.divideBy(divisor).floor().multiplyBy(divisor));
+};
