@@ -4,10 +4,10 @@ Number.SE.prototype.add = function(number){
 	if((n1.isNegative() && !n2.isNegative()) || (!n1.isNegative() && n2.isNegative())){
 		var is1neg = n1.isNegative();
 		var is2neg = n2.isNegative();
-		n1.number = n1.abs();
-		n2.number = n2.abs();
-		var largerNumber = n1.number > n2.number ? n1 : n1.number < n2.number ? n2 : false;
-		var smallerNumber = n1.number > n2.number ? n2 : n1.number < n2.number ? n1 : false;
+		n1.number = n1.abs().number;
+		n2.number = n2.abs().number;
+		var largerNumber = n1.greaterThan(n2) ? n1 : n1.lessThan(n2) ? n2 : false;
+		var smallerNumber = n1.greaterThan(n2) ? n2 : n1.lessThan(n2) ? n1 : false;
 		if(largerNumber === false || smallerNumber === false) return Number.SE("0");
 		var isNeg = (largerNumber.number === n1.number && is1neg) || (largerNumber.number === n2.number && is2neg);
 		var number = (isNeg ? "-" : "") + largerNumber.subtract(smallerNumber).number;
@@ -15,8 +15,8 @@ Number.SE.prototype.add = function(number){
 	}
 	var isNeg = n1.isNegative() && n2.isNegative();
 	if(isNeg){
-		n1.number = n1.abs();
-		n2.number = n2.abs();
+		n1.number = n1.abs().number;
+		n2.number = n2.abs().number;
 	}
 	n1 = n1.number.split('').reverse();
 	n2 = n2.number.split('').reverse();
@@ -37,14 +37,14 @@ Number.SE.prototype.add = function(number){
 Number.SE.prototype.subtract = function(number){
 	var [n1, n2] = Number.SE.alignDecimals(this.number, number);
 	if(n1.isNegative() && !n2.isNegative()){
-		n1.number = n1.abs();
+		n1.number = n1.abs().number;
 		return Number.SE("-"+n1.add(n2).number);
 	}else if(!n1.isNegative() && n2.isNegative()){
-		n2.number = n2.abs();
+		n2.number = n2.abs().number;
 		return Number.SE(n1.add(n2).number);
 	}else if(n2.isNegative() && n1.isNegative()){
-		n1.number = n1.abs();
-		n2.number = n2.abs();
+		n1.number = n1.abs().number;
+		n2.number = n2.abs().number;
 		var isNegative = n1.number > n2.number;
 		if(!isNegative){
 			var temp = n1;
@@ -132,8 +132,7 @@ Number.SE.prototype.multiplyBy = function(number){
 
 Number.SE.prototype.divideBy = function(divisor) {
 	var dividend = this.number;
-	if(!(divisor instanceof Number.SE)) divisor = new Number.SE(divisor).number;
-	
+	divisor = new Number.SE(divisor).number;
 	var isNegative = false;
 	if(dividend.substr(0,1)=="-"){
 		isNegative = !isNegative;
@@ -143,7 +142,6 @@ Number.SE.prototype.divideBy = function(divisor) {
 		isNegative = !isNegative;
 		divisor = divisor.substr(1);
 	}
-	
 	var dvr_dec_places = 0;
 	if (divisor.indexOf(".") > -1) {
 		var dvr_dec_ar = divisor.split(".");
@@ -176,9 +174,9 @@ Number.SE.prototype.divideBy = function(divisor) {
 			dvd_ar.push("0");
 			all_digits_used = true;
 		}
-		answer = answer + Math.floor((Number(digit) + (remainder * 10)) / divisor);
+		answer = answer + Number.SE(Number.SE(digit).add(Number.SE(remainder).multiplyBy(10)).floor().number/divisor).floor().number;
 		remainder = (Number(digit) + (remainder * 10)) % divisor;
-		var solved = all_digits_used && remainder == 0;
+		solved = all_digits_used && remainder == 0;
 		ans_plc++;
 		i++;
 	}

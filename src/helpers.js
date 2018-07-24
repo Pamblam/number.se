@@ -4,14 +4,14 @@ Number.SE.prototype.isNegative = function(){
 };
 
 Number.SE.prototype.abs = function(){
-	return this.isNegative() ? this.number.substr(1) : this.number;
+	return Number.SE(this.isNegative() ? this.number.substr(1) : this.number);
 };
 
 Number.SE.prototype.greaterThan = function(y){
 	const trimLeadingZeros = n=>{ while(n.substr(0,1)=="0") n=n.substr(1); return n; }
 	const trimTrailingZeros = n=>{ while(n.substr(-1)=="0") n=n.substr(0, n.length-1); return n; }
 	var x = this.number;
-	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
+	y = new Number.SE(y).number;
 	if(!~x.indexOf(".")) x+=".";
 	if(!~y.indexOf(".")) y+=".";
 	x = trimLeadingZeros(trimTrailingZeros(x));
@@ -39,9 +39,15 @@ Number.SE.prototype.equals = function(y){
 
 Number.SE.prototype.floor = function(){
 	if(!~this.number.indexOf(".")) return Number.SE(this.number);
-	return Number.SE(this.number.split(".")[0] || "0");
+	var n = this.number.split(".")[0];
+	if(!n || n==="-") n=0;
+	return Number.SE(n);
 };
 
 Number.SE.prototype.mod = function(divisor) {
 	return this.subtract(this.divideBy(divisor).floor().multiplyBy(divisor));
+};
+
+Number.SE.prototype.negate = function(){
+	return this.isNegative() ? this.abs() : Number.SE("-"+this.number);
 };

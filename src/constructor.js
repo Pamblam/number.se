@@ -8,7 +8,35 @@ Number.SE.version = '{{ VERSION }}';
 
 Number.SE.precision = 1000;
 
+Number.SE.fromENotation = function (n) {
+	var n = n.toString();
+	n = n.toUpperCase();
+	if (!~n.indexOf('E')) return n;
+	var p = n.split('E');
+	var right = true;
+	var sign = p[1].substr(0, 1);
+	if (sign === "-") right = false;
+	if (sign === "-" || sign === "+") p[1] = p[1].substr(1);
+	var places = Number(p[1]);
+	var val = p[0];
+	if (!~val.indexOf(".")) val += ".";
+	while (places--) {
+		var pos = val.indexOf(".");
+		val = val.replace(/\./g, '');
+		if (right) {
+			if (val.length === pos) val += "0";
+			pos++;
+		} else {
+			if (pos === 0) val = "0" + val;
+			else pos--;
+		}
+		val = val.substr(0, pos) + "." + val.substr(pos);
+	}
+	return val;
+};
+
 Number.SE.normalize = function(number){
+	if(!number) number = 0;
 	if(typeof number !== "string" && typeof number !== "number" && !(number instanceof Number.SE)){
 		throw new Error("SE Contrstructor requires a number or string");
 	}
@@ -16,7 +44,10 @@ Number.SE.normalize = function(number){
 	const trimLeadingZeroes = n=> n.substr(0,1)==="0"?trimLeadingZeroes(n.substr(1)):n;
 	var n = typeof number === "string" ? number : number instanceof Number.SE ? number.number : number.toString();
 	n = n.trim();
+	if(~n.toUpperCase().indexOf("E")) n = Number.SE.fromENotation(n);
+	if(n.substr(-1) === ".") n = n.substr(0, n.length-1);
 	if(!/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(n)){
+		console.log("n", n);
 		throw new Error("SE Contrstructor requires a valid numeric string");
 	}
 	if(n.substr(0,1) === "+") n = n.substr(1);
@@ -42,7 +73,7 @@ Number.SE.max = function(){
 		if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
 		if(number1.isNegative() && !number2.isNegative()) return number2;
 		if(!number1.isNegative() && number2.isNegative()) return number1;
-		return number1.abs() > number2.abs() ? number1 : number2;
+		return number1.greaterThan(number2) ? number1 : number2;
 	}
 };
 
@@ -61,7 +92,7 @@ Number.SE.min = function(){
 		if(!(number2 instanceof Number.SE)) number2 = new Number.SE(number2);
 		if(number1.isNegative() && !number2.isNegative()) return number1;
 		if(!number1.isNegative() && number2.isNegative()) return number2;
-		return number1.abs() > number2.abs() ? number2 : number1;
+		return number1.greaterThan(number2) ? number2 : number1;
 	}
 };
 
@@ -70,8 +101,8 @@ Number.SE.alignDecimals = function(number1, number2){
 	number2 = new Number.SE(number2);
 	var is1neg = number1.isNegative();
 	var is2neg = number2.isNegative();
-	number1.number = number1.abs(); 
-	number2.number = number2.abs();
+	number1.number = number1.abs().number; 
+	number2.number = number2.abs().number;
 	const getDecimalPosit = n=>~n.number.indexOf(".") ? n.number.indexOf(".") : n.number.length;
 	const addLeadingZeros = (n, dif)=>"0".repeat(dif)+n.number;
 	const addTrailingZeros = (n, dif)=>n.number+"0".repeat(dif);
@@ -111,5 +142,8 @@ Number.SE.toFraction = function (number) {
 	var n = number.split(".");
 	var denominator = "1"+("0".repeat(n[1].length));
 	var numerator = Number.SE(n[0]?n[0]:0).multiplyBy(denominator).add(n[1]).number;
+	var gcd = Number.SE.greatestCommonDivisor(denominator, numerator);
+	denominator = Number.SE(denominator).divideBy(gcd);
+	numerator = Number.SE(numerator).divideBy(gcd);
 	return {numerator: numerator, denominator: denominator};
 };
