@@ -1,4 +1,12 @@
 
+Number.SE.prototype.toNumber = function(){
+	return Number(this.number);
+};
+
+Number.SE.prototype.isInt = function(){
+	return !~this.number.indexOf(".");
+};
+
 Number.SE.prototype.isNegative = function(){
 	return this.number.substr(0,1) === "-";
 };
@@ -33,8 +41,8 @@ Number.SE.prototype.lessThan = function(y){
 };
 
 Number.SE.prototype.equals = function(y){
-	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
-	return y===this.number;
+	if(!(y instanceof Number.SE)) y = new Number.SE(y);
+	return y.number===this.number;
 };
 
 Number.SE.prototype.floor = function(){

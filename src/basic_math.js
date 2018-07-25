@@ -165,7 +165,7 @@ Number.SE.prototype.divideBy = function(divisor) {
 	var i = 0;
 	var ans_plc = 1;
 	var solved = false;
-	while (answer.length-dvd_int_places < Number.SE.precision && !solved) {	
+	while (answer.length-dvd_int_places < Number.SE.PRECISION && !solved) {	
 		var all_digits_used = false;
 		if (i < dvd_ar.length) {
 			digit = dvd_ar[i].toString();
