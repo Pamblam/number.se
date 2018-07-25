@@ -1,6 +1,6 @@
 {
   "name": "number.se",
-  "version": "1.0.124",
+  "version": "1.0.125",
   "description": "Arithmetic library that uses string-encoded numbers to hanlde values much larger than Javascript's max safe integer",
   "main": "number.se.js",
   "scripts": {

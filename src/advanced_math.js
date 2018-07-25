@@ -39,6 +39,10 @@ Number.SE.prototype.factorial = function(){
 	}
 };
 
+Number.SE.cos = function(){
+	// https://math.stackexchange.com/questions/501660/is-there-a-way-to-get-trig-functions-without-a-calculator
+};
+
 Number.SE.prototype.sin = function(){
 	var sin = this; var add = false; var lastval = sin;
 	for(i=1;1;i+=2){
