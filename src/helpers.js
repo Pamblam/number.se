@@ -1,12 +1,4 @@
 
-Number.SE.prototype.toNumber = function(){
-	return Number(this.number);
-};
-
-Number.SE.prototype.isInt = function(){
-	return !~this.number.indexOf(".");
-};
-
 Number.SE.prototype.isNegative = function(){
 	return this.number.substr(0,1) === "-";
 };
@@ -41,8 +33,8 @@ Number.SE.prototype.lessThan = function(y){
 };
 
 Number.SE.prototype.equals = function(y){
-	if(!(y instanceof Number.SE)) y = new Number.SE(y);
-	return y.number===this.number;
+	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
+	return y===this.number;
 };
 
 Number.SE.prototype.floor = function(){
@@ -53,7 +45,12 @@ Number.SE.prototype.floor = function(){
 };
 
 Number.SE.prototype.mod = function(divisor) {
-	return this.subtract(this.divideBy(divisor).floor().multiplyBy(divisor));
+	//return this.subtract(this.divideBy(divisor).floor().multiplyBy(divisor));
+	divisor = Number.SE(divisor).abs().number;
+	var neg = this.isNegative();
+	var t = this.abs();
+	while(t.greaterThan(divisor)) t = t.subtract(divisor);
+	return neg ? t.negate() : t;
 };
 
 Number.SE.prototype.negate = function(){

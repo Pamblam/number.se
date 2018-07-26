@@ -2,6 +2,8 @@
 const expect = require('chai').expect;
 require("../number.se.js")
 
+Number.SE.PRECISION	= 1000;
+
 describe('Testing Constructor', ()=>{
 	it('Constructor as Number', ()=>{
 		expect(Number.SE(8.139).number==='8.139').to.be.true;
