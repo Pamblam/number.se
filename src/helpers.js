@@ -49,7 +49,7 @@ Number.SE.prototype.mod = function(divisor) {
 	divisor = Number.SE(divisor).abs().number;
 	var neg = this.isNegative();
 	var t = this.abs();
-	while(t.greaterThan(divisor)) t = t.subtract(divisor);
+	while(t.greaterThan(divisor) || t.equals(divisor)) t = t.subtract(divisor);
 	return neg ? t.negate() : t;
 };
 

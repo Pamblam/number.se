@@ -161,7 +161,7 @@ Number.SE.prototype.divideBy = function(divisor) {
 	}
 	var digit = "";
 	var answer = "";
-	var remainder = 0;
+	var remainder = Number.SE(0);
 	var i = 0;
 	var ans_plc = 1;
 	var solved = false;
@@ -174,9 +174,9 @@ Number.SE.prototype.divideBy = function(divisor) {
 			dvd_ar.push("0");
 			all_digits_used = true;
 		}
-		answer = answer + Number.SE(Number.SE(digit).add(Number.SE(remainder).multiplyBy(10)).floor().number/divisor).floor().number;
-		remainder = (Number(digit) + (remainder * 10)) % divisor;
-		solved = all_digits_used && remainder == 0;
+		answer = answer + Number.SE(Number.SE(digit).add(remainder.multiplyBy(10)).floor().number/divisor).floor().number;
+		remainder = Number.SE(digit).add(remainder.multiplyBy(10)).mod(divisor);
+		solved = all_digits_used && remainder.equals(0);
 		ans_plc++;
 		i++;
 	}
