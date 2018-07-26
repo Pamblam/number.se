@@ -165,6 +165,14 @@ Number.SE.prototype.divideBy = function(divisor) {
 	var i = 0;
 	var ans_plc = 1;
 	var solved = false;
+	
+	// This block to speed things up a bit but not nessecary
+	if(dvd_ar.length > divisor.length){
+		answer = "0".repeat(divisor.length);
+		remainder = Number.SE(dvd_ar.join('').substr(0, divisor.length));
+		i = divisor.length;
+	}
+	
 	while (answer.length-dvd_int_places < Number.SE.PRECISION && !solved) {	
 		var all_digits_used = false;
 		if (i < dvd_ar.length) {
