@@ -63,11 +63,19 @@ Number.SE.prototype.subtract = function(number){
 	n2 = n2.number.split('').reverse();
 	var buffer = [];
 	const borrow = (arr, idx) => {
-		if("."===arr[idx+1]) return borrow(arr, idx+1);
-		if(parseInt(arr[idx+1])>0) arr[idx+1] = (parseInt(arr[idx+1])-1).toString();
-		else{
-			arr[idx+1] = (parseInt("1"+arr[idx+1])-1).toString()
-			borrow(arr, idx+1);
+		while (1) {
+			if (idx >= arr.length - 1) throw new Error('Nothing to borrow from');
+			if ("." === arr[idx + 1]) {
+				idx++;
+				continue;
+			}
+			if (parseInt(arr[idx + 1]) > 0) {
+				arr[idx + 1] = (parseInt(arr[idx + 1]) - 1).toString();
+				return;
+			} else {
+				arr[idx + 1] = (parseInt("1" + arr[idx + 1]) - 1).toString();
+				idx++;
+			}
 		}
 	};
 	for(let i=0; i<n1.length; i++){
@@ -168,9 +176,9 @@ Number.SE.prototype.divideBy = function(divisor) {
 	
 	// This block to speed things up a bit but not nessecary
 	if(dvd_ar.length > divisor.length){
-		answer = "0".repeat(divisor.length);
-		remainder = Number.SE(dvd_ar.join('').substr(0, divisor.length));
-		i = divisor.length;
+		answer = "0".repeat(divisor.length-1);
+		remainder = Number.SE(dvd_ar.join('').substr(0, divisor.length-1));
+		i = divisor.length-1;
 	}
 	
 	while (answer.length-dvd_int_places < Number.SE.PRECISION && !solved) {	
@@ -179,7 +187,6 @@ Number.SE.prototype.divideBy = function(divisor) {
 			digit = dvd_ar[i].toString();
 		} else {
 			digit = "0";
-			dvd_ar.push("0");
 			all_digits_used = true;
 		}
 		answer = answer + Number.SE(Number.SE(digit).add(remainder.multiplyBy(10)).floor().number/divisor).floor().number;
