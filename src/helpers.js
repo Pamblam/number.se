@@ -33,8 +33,8 @@ Number.SE.prototype.lessThan = function(y){
 };
 
 Number.SE.prototype.equals = function(y){
-	if(!(y instanceof Number.SE)) y = new Number.SE(y).number;
-	return y===this.number;
+	if(!(y instanceof Number.SE)) y = new Number.SE(y);
+	return y.number===this.number;
 };
 
 Number.SE.prototype.floor = function(){
@@ -55,4 +55,16 @@ Number.SE.prototype.mod = function(divisor) {
 
 Number.SE.prototype.negate = function(){
 	return this.isNegative() ? this.abs() : Number.SE("-"+this.number);
+};
+
+Number.SE.prototype.isInt = function(){	
+	return !~this.number.indexOf(".");	
+};
+
+Number.SE.prototype.toNumber = function(){	
+	return Number(this.number);	
+};
+
+Number.SE.prototype.toString = function(){	
+	return this.number;	
 };
